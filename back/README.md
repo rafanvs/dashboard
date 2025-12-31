@@ -70,7 +70,7 @@ npm run start:dev
 npm run start:prod
 ```
 
-A API estará acessível em `http://localhost:3000`.
+A API estará acessível em `http://localhost:8080` (ou na porta definida em `PORT`).
 
 ## 🧪 Testes
 

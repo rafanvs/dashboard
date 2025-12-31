@@ -39,10 +39,9 @@ Retorna as informações do usuário autenticado. Requer o token JWT.
 
   ```json
   {
-    "id": 1,
+    "userId": 1,
     "email": "user@example.com",
-    "name": "Nome do Usuário",
-    ...
+    "name": "Nome do Usuário"
   }
   ```
 

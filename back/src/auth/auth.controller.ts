@@ -8,6 +8,7 @@ interface AuthenticatedRequest extends Request {
     email: string;
     id: number;
     userId?: number;
+    name?: string | null;
   };
 }
 
@@ -26,7 +27,8 @@ export class AuthController {
   getProfile(@Request() req: AuthenticatedRequest): {
     userId: number;
     email: string;
+    name?: string | null;
   } {
-    return req.user as any as { userId: number; email: string };
+    return req.user as any as { userId: number; email: string; name?: string | null };
   }
 }
