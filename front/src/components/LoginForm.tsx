@@ -1,17 +1,11 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const callbackUrl = useMemo(
-    () => searchParams.get("callbackUrl") ?? "/dashboard",
-    [searchParams],
-  );
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +21,6 @@ export function LoginForm() {
         email,
         password,
         redirect: false,
-        callbackUrl,
       });
 
       if (!res || res.error) {
@@ -35,7 +28,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push(res.url ?? callbackUrl);
+      router.push("/dashboard");
       router.refresh();
     } finally {
       setLoading(false);
