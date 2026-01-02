@@ -45,6 +45,25 @@ export default async function DashboardPage() {
           </pre>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Link
+            href="/dashboard/users"
+            className="flex flex-col gap-1 rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:bg-zinc-50"
+          >
+            <p className="text-sm font-medium text-zinc-900">Usuários</p>
+            <p className="text-xs text-zinc-600">
+              Ver e gerenciar usuários cadastrados.
+            </p>
+          </Link>
+
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 opacity-60">
+            <p className="text-sm font-medium text-zinc-900">Configurações</p>
+            <p className="text-xs text-zinc-600">
+              Gerencie suas preferências de conta.
+            </p>
+          </div>
+        </div>
+
         <div className="text-sm text-zinc-600">
           <Link className="underline underline-offset-4" href="/">
             Voltar para o início

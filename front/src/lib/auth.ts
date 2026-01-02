@@ -11,12 +11,6 @@ type BackendProfileResponse = {
   name?: string | null;
 };
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`Variável de ambiente ${name} não definida`);
-  return value;
-}
-
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
@@ -28,13 +22,11 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        const email = credentials?.email;
-        const password = credentials?.password;
-        if (!email || !password) return null;
+        if (!credentials?.email || !credentials?.password) return null;
 
-        const backendUrl = requireEnv("BACKEND_URL").replace(/\/$/, "");
+        const { email, password } = credentials;
 
-        const loginRes = await fetch(`${backendUrl}/auth/login`, {
+        const loginRes = await fetch(`${process.env.BACKEND_URL}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
@@ -45,7 +37,7 @@ export const authOptions: NextAuthOptions = {
         const loginData = (await loginRes.json()) as BackendLoginResponse;
         if (!loginData?.access_token) return null;
 
-        const profileRes = await fetch(`${backendUrl}/auth/profile`, {
+        const profileRes = await fetch(`${process.env.BACKEND_URL}/auth/profile`, {
           headers: { Authorization: `Bearer ${loginData.access_token}` },
         });
 
@@ -66,20 +58,16 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.userId = (user as any).id;
-        token.email = (user as any).email;
-        token.name = (user as any).name;
-        token.accessToken = (user as any).accessToken;
+        token.userId = user.id;
+        token.accessToken = user.accessToken;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = (token.userId as string) ?? session.user.id;
-        session.user.email = (token.email as string) ?? session.user.email;
-        session.user.name = (token.name as string) ?? session.user.name;
+        session.user.id = token.userId ?? session.user.id;
+        session.accessToken = token.accessToken;
       }
-      session.accessToken = token.accessToken as string | undefined;
       return session;
     },
   },
