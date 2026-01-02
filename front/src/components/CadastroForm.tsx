@@ -13,6 +13,7 @@ export function CadastroForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("USER");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -30,6 +31,7 @@ export function CadastroForm() {
           name: name.trim() ? name.trim() : undefined,
           email,
           password,
+          role,
         }),
       });
 
@@ -92,6 +94,19 @@ export function CadastroForm() {
           autoComplete="new-password"
           placeholder="••••••••"
         />
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-sm font-medium text-zinc-900">Papel (Role)</label>
+        <select
+          className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-zinc-900 outline-none focus:border-zinc-400"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          required
+        >
+          <option value="USER">Usuário</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
       </div>
 
       {error ? (

@@ -2,19 +2,24 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users, RefreshCcw } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { ArrowLeft, Users, RefreshCcw, Trash2 } from "lucide-react";
 
 interface User {
     id: string;
     name: string;
     email: string;
+    role: string;
     createdAt: string;
 }
 
 export default function UsersPage() {
+    const { data: session } = useSession();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const isAdmin = session?.user?.role === "ADMIN";
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -30,6 +35,24 @@ export default function UsersPage() {
             setError(err instanceof Error ? err.message : "Erro desconhecido");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+
+        try {
+            const response = await fetch(`/api/users/${id}`, {
+                method: "DELETE",
+            });
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || "Erro ao excluir usuário");
+            }
+            // Remove from local state
+            setUsers((prev) => prev.filter((u) => u.id !== id));
+        } catch (err) {
+            alert(err instanceof Error ? err.message : "Erro ao excluir");
         }
     };
 
@@ -95,8 +118,10 @@ export default function UsersPage() {
                                     <tr>
                                         <th className="px-6 py-4 text-sm font-semibold text-zinc-900">Nome</th>
                                         <th className="px-6 py-4 text-sm font-semibold text-zinc-900">Email</th>
+                                        <th className="px-6 py-4 text-sm font-semibold text-zinc-900">Papel</th>
                                         <th className="px-6 py-4 text-sm font-semibold text-zinc-900">ID</th>
                                         <th className="px-6 py-4 text-sm font-semibold text-zinc-900">Data de Cadastro</th>
+                                        {isAdmin && <th className="px-6 py-4 text-sm font-semibold text-zinc-900 text-right">Ações</th>}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-100">
@@ -108,12 +133,32 @@ export default function UsersPage() {
                                             <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-600">
                                                 {user.email}
                                             </td>
+                                            <td className="whitespace-nowrap px-6 py-4 text-sm">
+                                                <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${user.role === 'ADMIN'
+                                                    ? 'bg-zinc-950 text-zinc-50'
+                                                    : 'bg-zinc-100 text-zinc-600'
+                                                    }`}>
+                                                    {user.role}
+                                                </span>
+                                            </td>
                                             <td className="whitespace-nowrap px-6 py-4 text-xs font-mono text-zinc-400">
                                                 {user.id}
                                             </td>
                                             <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-600">
                                                 {new Date(user.createdAt).toLocaleDateString('pt-BR')}
                                             </td>
+                                            {isAdmin && (
+                                                <td className="whitespace-nowrap px-6 py-4 text-right">
+                                                    <button
+                                                        onClick={() => handleDelete(user.id)}
+                                                        disabled={session?.user?.id === user.id}
+                                                        className="inline-flex items-center justify-center rounded-lg p-2 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-0"
+                                                        title={session?.user?.id === user.id ? "Você não pode se excluir" : "Excluir usuário"}
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>

@@ -9,12 +9,13 @@ interface AuthenticatedRequest extends Request {
     id: number;
     userId?: number;
     name?: string | null;
+    role: string;
   };
 }
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -27,8 +28,15 @@ export class AuthController {
   getProfile(@Request() req: AuthenticatedRequest): {
     userId: number;
     email: string;
+    role: string;
     name?: string | null;
   } {
-    return req.user as any as { userId: number; email: string; name?: string | null };
+    const user = req.user;
+    return {
+      userId: Number(user.id || user.userId),
+      email: user.email,
+      role: user.role,
+      name: user.name,
+    };
   }
 }

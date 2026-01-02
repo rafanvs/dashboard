@@ -9,6 +9,7 @@ type BackendProfileResponse = {
   userId: number;
   email: string;
   name?: string | null;
+  role: string;
 };
 
 export const authOptions: NextAuthOptions = {
@@ -50,6 +51,7 @@ export const authOptions: NextAuthOptions = {
           id: String(profile.userId),
           email: profile.email,
           name: profile.name ?? undefined,
+          role: profile.role,
           accessToken: loginData.access_token,
         };
       },
@@ -59,6 +61,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.userId = user.id;
+        token.role = user.role;
         token.accessToken = user.accessToken;
       }
       return token;
@@ -66,6 +69,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.userId ?? session.user.id;
+        session.user.role = (token.role as string) ?? session.user.role;
         session.accessToken = token.accessToken;
       }
       return session;
