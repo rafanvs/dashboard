@@ -56,6 +56,16 @@ export default async function DashboardPage() {
             </p>
           </Link>
 
+          <Link
+            href="/dashboard/bots"
+            className="flex flex-col gap-1 rounded-2xl border border-zinc-200 bg-white p-5 transition-all hover:border-zinc-300 hover:bg-zinc-50"
+          >
+            <p className="text-sm font-medium text-zinc-900">Bots Telegram</p>
+            <p className="text-xs text-zinc-600">
+              Configure seus bots do Telegram para postagens.
+            </p>
+          </Link>
+
           <div className="rounded-2xl border border-zinc-200 bg-white p-5 opacity-60">
             <p className="text-sm font-medium text-zinc-900">Configurações</p>
             <p className="text-xs text-zinc-600">
