@@ -11,10 +11,21 @@ datasource db {
 }
 
 model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  password     String
+  name         String?
+  role         String        @default("USER")
+  createdAt    DateTime      @default(now())
+  telegramBots TelegramBot[]
+}
+
+model TelegramBot {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  role      String   @default("USER")
+  name      String
+  token     String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
