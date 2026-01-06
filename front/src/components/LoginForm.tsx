@@ -1,83 +1,132 @@
 "use client";
 
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  Paper,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
+import {
+  Email as EmailIcon,
+  Lock as LockIcon,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 
 export function LoginForm() {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
-    try {
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+    setError(null);
 
-      if (!res || res.error) {
-        setError("Email ou senha inválidos.");
-        return;
-      }
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
-      router.push("/dashboard");
-      router.refresh();
-    } finally {
+    if (result?.error) {
+      setError("Email ou senha inválidos");
       setLoading(false);
+    } else {
+      router.push("/dashboard");
     }
-  }
+  };
 
   return (
-    <form onSubmit={onSubmit} className="w-full space-y-4">
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-zinc-900">Email</label>
-        <input
-          className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-zinc-900 outline-none focus:border-zinc-400"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoComplete="email"
-          placeholder="voce@exemplo.com"
-        />
-      </div>
+    <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+      <Typography
+        variant="h4"
+        component="h1"
+        sx={{ mb: 1, fontWeight: 700, textAlign: "center" }}
+      >
+        Bem-vindo de volta
+      </Typography>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        sx={{ mb: 4, textAlign: "center" }}
+      >
+        Insira suas credenciais para acessar o painel
+      </Typography>
 
-      <div className="space-y-1">
-        <label className="text-sm font-medium text-zinc-900">Senha</label>
-        <input
-          className="h-11 w-full rounded-lg border border-zinc-200 bg-white px-3 text-zinc-900 outline-none focus:border-zinc-400"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="current-password"
-          placeholder="••••••••"
-        />
-      </div>
-
-      {error ? (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
           {error}
-        </p>
-      ) : null}
+        </Alert>
+      )}
 
-      <button
+      <TextField
+        fullWidth
+        label="E-mail"
+        variant="outlined"
+        margin="normal"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <EmailIcon fontSize="small" color="action" />
+            </InputAdornment>
+          ),
+        }}
+      />
+
+      <TextField
+        fullWidth
+        label="Senha"
+        type={showPassword ? "text" : "password"}
+        variant="outlined"
+        margin="normal"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <LockIcon fontSize="small" color="action" />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => setShowPassword(!showPassword)}
+                edge="end"
+                size="small"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+
+      <Button
+        fullWidth
+        variant="contained"
+        size="large"
         type="submit"
         disabled={loading}
-        className="h-11 w-full rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-60"
+        sx={{ mt: 3, py: 1.5, borderRadius: 2 }}
       >
-        {loading ? "Entrando..." : "Entrar"}
-      </button>
-    </form>
+        {loading ? <CircularProgress size={24} color="inherit" /> : "Entrar"}
+      </Button>
+    </Box>
   );
 }
-
-

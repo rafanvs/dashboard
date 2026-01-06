@@ -1,32 +1,67 @@
-import Link from "next/link";
+"use client";
+
+import { Box, Container, Paper, Typography, Link as MuiLink } from "@mui/material";
 import { LoginForm } from "@/components/LoginForm";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function LoginPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return null; // Ou um loading spinner
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6">
-      <div className="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-            Entrar
-          </h1>
-          <p className="text-sm text-zinc-600">
-            Use seu email e senha cadastrados no backend.
-          </p>
-        </div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "background.default",
+        px: 2,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 4, md: 6 },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <LoginForm />
 
-        <LoginForm />
-
-        <div className="mt-6 flex items-center justify-between text-sm text-zinc-600">
-          <Link className="underline underline-offset-4" href="/cadastro">
-            Criar conta
-          </Link>
-          <Link className="underline underline-offset-4" href="/">
-            Voltar para o início
-          </Link>
-        </div>
-      </div>
-    </div>
+          <Typography variant="body2" sx={{ mt: 4, color: "text.secondary" }}>
+            Não tem uma conta?{" "}
+            <Link href="/cadastro" style={{ textDecoration: "none" }}>
+              <MuiLink
+                component="span"
+                sx={{
+                  fontWeight: 600,
+                  color: "primary.main",
+                  cursor: "pointer",
+                  "&:hover": { textDecoration: "underline" },
+                }}
+              >
+                Crie uma agora
+              </MuiLink>
+            </Link>
+          </Typography>
+        </Paper>
+      </Container>
+    </Box>
   );
 }
-
-

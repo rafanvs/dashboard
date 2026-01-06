@@ -1,9 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, Bot, RefreshCcw, Trash2, Plus, X } from "lucide-react";
+import {
+    Box,
+    Typography,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    IconButton,
+    Button,
+    CircularProgress,
+    Alert,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Tooltip,
+} from "@mui/material";
+import {
+    Refresh as RefreshIcon,
+    Delete as DeleteIcon,
+    SmartToy as BotIcon,
+    Add as AddIcon,
+} from "@mui/icons-material";
 
 interface TelegramBot {
     id: number;
@@ -55,8 +80,7 @@ export default function BotsPage() {
 
             const createdBot = await response.json();
             setBots((prev) => [...prev, createdBot]);
-            setIsModalOpen(false);
-            setNewBot({ name: "", token: "" });
+            handleCloseModal();
         } catch (err) {
             alert(err instanceof Error ? err.message : "Erro ao criar");
         } finally {
@@ -81,196 +105,170 @@ export default function BotsPage() {
         }
     };
 
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setNewBot({ name: "", token: "" });
+    };
+
     useEffect(() => {
         fetchBots();
     }, []);
 
     return (
-        <div className="min-h-screen bg-zinc-50 px-6 py-10">
-            <div className="mx-auto w-full max-w-4xl space-y-8">
-                <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-zinc-500">
-                            <Bot size={20} />
-                            <h2 className="text-sm font-medium uppercase tracking-wider">Configurações</h2>
-                        </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+        <>
+            <Box>
+                <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                    <Box>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1, color: "text.secondary" }}>
+                            <BotIcon sx={{ fontSize: 18 }} />
+                            <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: 1.2 }}>
+                                Configurações
+                            </Typography>
+                        </Box>
+                        <Typography variant="h4" sx={{ fontWeight: 700 }}>
                             Meus Bots do Telegram
-                        </h1>
-                        <p className="text-zinc-600">
-                            Gerencie seus bots do Telegram para postagens automáticas.
-                        </p>
-                    </div>
+                        </Typography>
+                    </Box>
 
-                    <div className="flex gap-2">
-                        <button
-                            onClick={fetchBots}
-                            disabled={loading}
-                            className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm ring-1 ring-zinc-200 transition-all hover:bg-zinc-50 disabled:opacity-50"
-                        >
-                            <RefreshCcw size={16} className={loading ? "animate-spin" : ""} />
-                        </button>
-                        <button
+                    <Box sx={{ display: "flex", gap: 2 }}>
+                        <IconButton onClick={fetchBots} disabled={loading} sx={{ border: "1px solid", borderColor: "zinc.200", borderRadius: 2 }}>
+                            <RefreshIcon fontSize="small" className={loading ? "animate-spin" : ""} />
+                        </IconButton>
+                        <Button
+                            startIcon={<AddIcon />}
+                            variant="contained"
                             onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white shadow-md transition-all hover:bg-zinc-800"
+                            sx={{ borderRadius: 2 }}
                         >
-                            <Plus size={16} />
                             Novo Bot
-                        </button>
-                    </div>
-                </div>
+                        </Button>
+                    </Box>
+                </Box>
 
-                <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-                    {loading && bots.length === 0 ? (
-                        <div className="flex h-64 items-center justify-center">
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-600" />
-                                <p className="text-sm text-zinc-500">Carregando bots...</p>
-                            </div>
-                        </div>
-                    ) : error ? (
-                        <div className="flex h-64 items-center justify-center">
-                            <div className="text-center">
-                                <p className="text-sm font-medium text-red-600">{error}</p>
-                                <button
-                                    onClick={fetchBots}
-                                    className="mt-4 text-sm font-medium text-zinc-900 underline underline-offset-4"
-                                >
-                                    Tentar novamente
-                                </button>
-                            </div>
-                        </div>
-                    ) : bots.length === 0 ? (
-                        <div className="flex h-64 items-center justify-center">
-                            <div className="text-center space-y-2">
-                                <p className="text-sm text-zinc-500">Nenhum bot cadastrado.</p>
-                                <button
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="text-sm font-medium text-zinc-900 underline underline-offset-4"
-                                >
-                                    Cadastrar meu primeiro bot
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="border-b border-zinc-100 bg-zinc-50/50">
-                                    <tr>
-                                        <th className="px-6 py-4 text-sm font-semibold text-zinc-900">Nome</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-zinc-900">Token</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-zinc-900">Data</th>
-                                        <th className="px-6 py-4 text-sm font-semibold text-zinc-900 text-right">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-zinc-100">
-                                    {bots.map((bot) => (
-                                        <tr key={bot.id} className="transition-colors hover:bg-zinc-50/50">
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-zinc-900">
-                                                {bot.name}
-                                            </td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm font-mono text-zinc-400">
-                                                {bot.token.substring(0, 10)}...{bot.token.substring(bot.token.length - 4)}
-                                            </td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-600">
-                                                {new Date(bot.createdAt).toLocaleDateString('pt-BR')}
-                                            </td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-right">
-                                                <button
+                {error && (
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                )}
+
+                <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 3 }}>
+                    <Table sx={{ minWidth: 650 }}>
+                        <TableHead sx={{ bgcolor: "background.default" }}>
+                            <TableRow>
+                                <TableCell sx={{ fontWeight: 600 }}>Nome</TableCell>
+                                <TableCell sx={{ fontWeight: 600 }}>Token</TableCell>
+                                <TableCell sx={{ fontWeight: 600 }}>Data</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 600 }}>Ações</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {loading && bots.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center" sx={{ py: 6 }}>
+                                        <CircularProgress size={32} thickness={5} />
+                                        <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
+                                            Carregando bots...
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ) : bots.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} align="center" sx={{ py: 6 }}>
+                                        <Typography variant="body1" color="text.secondary">
+                                            Nenhum bot cadastrado.
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                bots.map((bot) => (
+                                    <TableRow key={bot.id} hover>
+                                        <TableCell sx={{ fontWeight: 500 }}>{bot.name}</TableCell>
+                                        <TableCell>
+                                            <Typography
+                                                variant="caption"
+                                                sx={{
+                                                    fontFamily: "var(--font-geist-mono)",
+                                                    color: "text.disabled",
+                                                    bgcolor: "grey.50",
+                                                    px: 1,
+                                                    py: 0.5,
+                                                    borderRadius: 1,
+                                                }}
+                                            >
+                                                {bot.token.substring(0, 8)}••••••••{bot.token.substring(bot.token.length - 4)}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell sx={{ color: "text.secondary" }}>
+                                            {new Date(bot.createdAt).toLocaleDateString("pt-BR")}
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Tooltip title="Excluir bot">
+                                                <IconButton
                                                     onClick={() => handleDelete(bot.id)}
-                                                    className="inline-flex items-center justify-center rounded-lg p-2 text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                                                    title="Excluir bot"
+                                                    color="error"
+                                                    size="small"
+                                                    sx={{ opacity: 0.6, "&:hover": { opacity: 1 } }}
                                                 >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
-
-                <div className="pt-4">
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
-                    >
-                        <ArrowLeft size={16} />
-                        Voltar para o Dashboard
-                    </Link>
-                </div>
-            </div>
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
 
             {/* Modal para Novo Bot */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-                        <div className="mb-6 flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-zinc-900">Cadastrar Novo Bot</h3>
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleCreate} className="space-y-4">
-                            <div className="space-y-2">
-                                <label htmlFor="name" className="text-sm font-medium text-zinc-700">
-                                    Nome do Bot (Para sua referência)
-                                </label>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    required
-                                    placeholder="Ex: Bot de Descontos"
-                                    value={newBot.name}
-                                    onChange={(e) => setNewBot({ ...newBot, name: e.target.value })}
-                                    className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-900 transition-all focus:ring-2"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label htmlFor="token" className="text-sm font-medium text-zinc-700">
-                                    Token do Telegram
-                                </label>
-                                <input
-                                    id="token"
-                                    type="text"
-                                    required
-                                    placeholder="Ex: 123456:ABC-DEF..."
-                                    value={newBot.token}
-                                    onChange={(e) => setNewBot({ ...newBot, token: e.target.value })}
-                                    className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-900 transition-all focus:ring-2"
-                                />
-                                <p className="text-[10px] text-zinc-400 italic">
-                                    Você obtém este token conversando com o @BotFather no Telegram.
-                                </p>
-                            </div>
-
-                            <div className="mt-6 flex gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 rounded-lg border border-zinc-200 py-2 text-sm font-medium text-zinc-700 transition-all hover:bg-zinc-50"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="flex-1 rounded-lg bg-zinc-900 py-2 text-sm font-medium text-white transition-all hover:bg-zinc-800 disabled:opacity-50"
-                                >
-                                    {isSubmitting ? "Cadastrando..." : "Confirmar"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-        </div>
+            <Dialog
+                open={isModalOpen}
+                onClose={handleCloseModal}
+                fullWidth
+                maxWidth="xs"
+                disableRestoreFocus // Pode ajudar com o erro de aria-hidden
+            >
+                <DialogTitle sx={{ fontWeight: 700 }}>Cadastrar Novo Bot</DialogTitle>
+                <Box component="form" onSubmit={handleCreate}>
+                    <DialogContent sx={{ pt: 1 }}>
+                        <TextField
+                            fullWidth
+                            label="Nome do Bot"
+                            placeholder="Ex: Bot de Promoções"
+                            margin="normal"
+                            required
+                            value={newBot.name}
+                            onChange={(e) => setNewBot({ ...newBot, name: e.target.value })}
+                        />
+                        <TextField
+                            fullWidth
+                            label="Token do Telegram"
+                            placeholder="Ex: 123456:ABC-DEF..."
+                            margin="normal"
+                            required
+                            multiline
+                            rows={2}
+                            value={newBot.token}
+                            onChange={(e) => setNewBot({ ...newBot, token: e.target.value })}
+                            helperText="Obtenha o token com o @BotFather no Telegram"
+                        />
+                    </DialogContent>
+                    <DialogActions sx={{ p: 3, pt: 1 }}>
+                        <Button onClick={handleCloseModal} color="inherit">
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={isSubmitting}
+                            sx={{ minWidth: 100 }}
+                        >
+                            {isSubmitting ? <CircularProgress size={20} color="inherit" /> : "Confirmar"}
+                        </Button>
+                    </DialogActions>
+                </Box>
+            </Dialog>
+        </>
     );
 }
