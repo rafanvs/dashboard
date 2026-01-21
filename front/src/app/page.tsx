@@ -1,45 +1,32 @@
-import Link from "next/link";
+"use client";
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import LoginPage from "./login/page";
+import { Box, CircularProgress } from "@mui/material";
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6">
-      <main className="w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-            Front + NextAuth
-          </h1>
-          <p className="text-sm text-zinc-600">
-            Autenticação via <span className="font-medium">Credentials</span>{" "}
-            consumindo o backend NestJS em <code>BACKEND_URL</code>.
-          </p>
-        </div>
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Link
-            href="/login"
-            className="inline-flex h-11 items-center justify-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white"
-          >
-            Ir para login
-          </Link>
-          <Link
-            href="/cadastro"
-            className="inline-flex h-11 items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
-          >
-            Criar conta
-          </Link>
-          <Link
-            href="/dashboard"
-            className="inline-flex h-11 items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50"
-          >
-            Dashboard (protegida)
-          </Link>
-        </div>
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
 
-        <p className="mt-6 text-sm text-zinc-600">
-          Dica: se você ainda não criou um usuário, use <code>POST /users</code>{" "}
-          no backend e depois autentique aqui.
-        </p>
-      </main>
-    </div>
-  );
+  if (status === "loading") {
+    return (
+      <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.default' }}>
+        <CircularProgress color="inherit" />
+      </Box>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return <LoginPage />;
+  }
+
+  return null;
 }

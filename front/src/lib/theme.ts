@@ -2,20 +2,22 @@ import { createTheme } from "@mui/material/styles";
 
 export const theme = createTheme({
     palette: {
+        mode: 'dark',
         primary: {
-            main: "#18181b", // zinc-900
+            main: "#ffffff",
         },
         secondary: {
-            main: "#71717a", // zinc-500
+            main: "#a1a1aa", // zinc-400
         },
         background: {
-            default: "#fafafa", // zinc-50
-            paper: "#ffffff",
+            default: "#09090b", // zinc-950
+            paper: "#09090b",
         },
         text: {
-            primary: "#09090b", // zinc-950
-            secondary: "#52525b", // zinc-600
+            primary: "#fafafa", // zinc-50
+            secondary: "#a1a1aa", // zinc-400
         },
+        divider: "rgba(255, 255, 255, 0.12)",
     },
     typography: {
         fontFamily: "var(--font-geist-sans), Inter, sans-serif",
@@ -34,15 +36,23 @@ export const theme = createTheme({
         },
     },
     shape: {
-        borderRadius: 12,
+        borderRadius: 8,
     },
     components: {
         MuiButton: {
             styleOverrides: {
                 root: {
                     boxShadow: "none",
+                    borderRadius: "8px",
                     "&:hover": {
                         boxShadow: "none",
+                    },
+                },
+                containedPrimary: {
+                    backgroundColor: "#fafafa",
+                    color: "#09090b",
+                    "&:hover": {
+                        backgroundColor: "#e4e4e7",
                     },
                 },
             },
@@ -50,8 +60,17 @@ export const theme = createTheme({
         MuiPaper: {
             styleOverrides: {
                 root: {
-                    border: "1px solid #e4e4e7", // zinc-200
+                    backgroundImage: "none",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
                     boxShadow: "none",
+                },
+            },
+        },
+        MuiDrawer: {
+            styleOverrides: {
+                paper: {
+                    backgroundColor: "#09090b",
+                    borderRight: "1px solid rgba(255, 255, 255, 0.1)",
                 },
             },
         },

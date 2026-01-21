@@ -79,6 +79,80 @@ export default function UsersPage() {
         fetchUsers();
     }, []);
 
+    const renderTableContent = () => {
+        if (loading) {
+            return (
+                <TableRow>
+                    <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                        <CircularProgress size={32} thickness={5} />
+                        <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
+                            Carregando usuários...
+                        </Typography>
+                    </TableCell>
+                </TableRow>
+            );
+        }
+
+        if (users.length === 0) {
+            return (
+                <TableRow>
+                    <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                        <Typography variant="body1" color="text.secondary">
+                            Nenhum usuário encontrado.
+                        </Typography>
+                    </TableCell>
+                </TableRow>
+            );
+        }
+
+        return users.map((user) => (
+            <TableRow key={user.id} hover>
+                <TableCell sx={{ fontWeight: 500 }}>{user.name}</TableCell>
+                <TableCell color="text.secondary">{user.email}</TableCell>
+                <TableCell>
+                    <Chip
+                        label={user.role}
+                        size="small"
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: "0.7rem",
+                            bgcolor: "surface.secondary",
+                            color: user.role === "ADMIN" ? "white" : "text.primary",
+                        }}
+                    />
+                </TableCell>
+                <TableCell>
+                    <Typography variant="caption" sx={{ fontFamily: "var(--font-geist-mono)", color: "text.disabled" }}>
+                        {user.id}
+                    </Typography>
+                </TableCell>
+                <TableCell sx={{ color: "text.secondary" }}>
+                    {new Date(user.createdAt).toLocaleDateString("pt-BR")}
+                </TableCell>
+                {isAdmin && (
+                    <TableCell align="right">
+                        <Tooltip title={session?.user?.id === user.id ? "Você não pode se excluir" : "Excluir usuário"}>
+                            <span>
+                                <IconButton
+                                    onClick={() => handleDelete(user.id)}
+                                    disabled={session?.user?.id === user.id}
+                                    color="error"
+                                    size="small"
+                                    sx={{
+                                        opacity: session?.user?.id === user.id ? 0 : 0.6,
+                                        "&:hover": { opacity: 1, bgcolor: "error.lighter" },
+                                    }}
+                                >
+                                    <DeleteIcon fontSize="small" />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </TableCell>
+                )}
+            </TableRow>
+        ));
+    };
+
     return (
         <Box>
             <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
@@ -124,71 +198,7 @@ export default function UsersPage() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {loading ? (
-                            <TableRow>
-                                <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                                    <CircularProgress size={32} thickness={5} />
-                                    <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
-                                        Carregando usuários...
-                                    </Typography>
-                                </TableCell>
-                            </TableRow>
-                        ) : users.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                                    <Typography variant="body1" color="text.secondary">
-                                        Nenhum usuário encontrado.
-                                    </Typography>
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            users.map((user) => (
-                                <TableRow key={user.id} hover>
-                                    <TableCell sx={{ fontWeight: 500 }}>{user.name}</TableCell>
-                                    <TableCell color="text.secondary">{user.email}</TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={user.role}
-                                            size="small"
-                                            sx={{
-                                                fontWeight: 600,
-                                                fontSize: "0.7rem",
-                                                bgcolor: user.role === "ADMIN" ? "primary.main" : "grey.100",
-                                                color: user.role === "ADMIN" ? "white" : "text.primary",
-                                            }}
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant="caption" sx={{ fontFamily: "var(--font-geist-mono)", color: "text.disabled" }}>
-                                            {user.id}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell sx={{ color: "text.secondary" }}>
-                                        {new Date(user.createdAt).toLocaleDateString("pt-BR")}
-                                    </TableCell>
-                                    {isAdmin && (
-                                        <TableCell align="right">
-                                            <Tooltip title={session?.user?.id === user.id ? "Você não pode se excluir" : "Excluir usuário"}>
-                                                <span>
-                                                    <IconButton
-                                                        onClick={() => handleDelete(user.id)}
-                                                        disabled={session?.user?.id === user.id}
-                                                        color="error"
-                                                        size="small"
-                                                        sx={{
-                                                            opacity: session?.user?.id === user.id ? 0 : 0.6,
-                                                            "&:hover": { opacity: 1, bgcolor: "error.lighter" },
-                                                        }}
-                                                    >
-                                                        <DeleteIcon fontSize="small" />
-                                                    </IconButton>
-                                                </span>
-                                            </Tooltip>
-                                        </TableCell>
-                                    )}
-                                </TableRow>
-                            ))
-                        )}
+                        {renderTableContent()}
                     </TableBody>
                 </Table>
             </TableContainer>
